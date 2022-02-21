@@ -71,7 +71,7 @@ BOOL StrContain(LPSTR a, LPSTR c)
 	return FALSE;
 }
 
-// filenames that cause the folder to be archived
+// files to always archive
 BOOL IsCacheFile(LPSTR str)
 {
 	if (StrEq(str,"1jfds")) return TRUE;
@@ -120,6 +120,21 @@ BOOL IsCacheFile(LPSTR str)
 	if (StrContain(str,"mudclient")) return TRUE;
 	return FALSE;
 }
+// directories to always archive
+BOOL IsCacheDir(LPSTR str)
+{
+	if (StrSuffix(str,"\\.jagex_cache_32")) return TRUE;
+	if (StrSuffix(str,"\\.file_store_32")) return TRUE;
+	if (StrSuffix(str,"\\jagexcache")) return TRUE;
+	if (StrSuffix(str,"\\classic")) return TRUE;
+	if (StrSuffix(str,"\\loginapplet")) return TRUE;
+	if (StrSuffix(str,"\\rsmap")) return TRUE;
+	if (StrSuffix(str,"\\runescape")) return TRUE;
+	if (StrSuffix(str,"\\oldschool\\LIVE")) return TRUE;
+	if (StrSuffix(str,"\\runescape\\LIVE")) return TRUE;
+	if (StrSuffix(str,"\\runescape\\LIVE_BETA")) return TRUE;
+	return FALSE;
+}
 
 // cache searching and copying
 BOOL HasCache(LPSTR strDir) 
@@ -138,9 +153,9 @@ BOOL HasCache(LPSTR strDir)
 	FindClose(h);
 	return r;
 }
-void LookIn(LPSTR strDir)
+void LookIn(LPSTR strDir,BOOL bIsCacheDir)
 {
-	if (!HasCache(strDir))
+	if (!bIsCacheDir&&!HasCache(strDir))
 	{
 		return;//do not copy
 	}
@@ -156,6 +171,10 @@ void LookIn(LPSTR strDir)
 	}
 	do
 	{
+		if (!bIsCacheDir&&!IsCacheFile(d.cFileName))
+		{
+			continue;
+		}
 		strBuf2[0]=0;
 		StrCat(strBuf2,strDir);
 		strBuf2[StrLen(strBuf2)-1]=0;
@@ -206,8 +225,9 @@ void ScanDir(LPSTR strDir)
 			StrCat(strBuf,strDir);
 			strBuf[StrLen(strBuf)-1]=0;
 			StrCat(strBuf,d.cFileName);
+			BOOL bIsCacheDir=IsCacheDir(strBuf);
 			StrCat(strBuf,"\\*");
-			LookIn(strBuf);
+			LookIn(strBuf,bIsCacheDir);
 			ScanDir(strBuf);
 		}
 	}while(FindNextFile(h,&d));
