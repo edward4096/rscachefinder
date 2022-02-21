@@ -354,6 +354,7 @@ LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				}
 				CloseHandle(hOut);
 			}
+			break;
 	}
     return FALSE;
 }
