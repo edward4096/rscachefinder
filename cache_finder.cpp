@@ -50,6 +50,76 @@ BOOL StrPrefix(LPSTR a, LPSTR prefix)
 	}
 	return TRUE;
 }
+BOOL StrContain(LPSTR a, LPSTR c)
+{
+	for(int i=0;a[i];i+=1)
+	{
+		BOOL bMatch = TRUE;
+		for (int j=0;c[j];j+=1)
+		{
+			if (a[i+j]!=c[j])
+			{
+				bMatch=FALSE;
+				break;
+			}
+		}
+		if (bMatch)
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+// filenames that cause the folder to be archived
+BOOL IsCacheFile(LPSTR str)
+{
+	if (StrEq(str,"1jfds")) return TRUE;
+	if (StrEq(str,"94jfj")) return TRUE;
+	if (StrEq(str,"a2155")) return TRUE;
+	if (StrEq(str,"cht3f")) return TRUE;
+	if (StrEq(str,"code.dat")) return TRUE;
+	if (StrEq(str,"g34zx")) return TRUE;
+	if (StrEq(str,"jingle0.mid")) return TRUE;
+	if (StrEq(str,"jingle1.mid")) return TRUE;
+	if (StrEq(str,"jingle2.mid")) return TRUE;
+	if (StrEq(str,"jingle3.mid")) return TRUE;
+	if (StrEq(str,"jingle4.mid")) return TRUE;
+	if (StrEq(str,"k23lk")) return TRUE;
+	if (StrEq(str,"k4o2n")) return TRUE;
+	if (StrEq(str,"lam3n")) return TRUE;
+	if (StrEq(str,"mn24j")) return TRUE;
+	if (StrEq(str,"plam3")) return TRUE;
+	if (StrEq(str,"shared_game_unpacker.dat")) return TRUE;
+	if (StrEq(str,"sound0.wav")) return TRUE;
+	if (StrEq(str,"sound1.wav")) return TRUE;
+	if (StrEq(str,"sound2.wav")) return TRUE;
+	if (StrEq(str,"sound3.wav")) return TRUE;
+	if (StrEq(str,"sound4.wav")) return TRUE;
+	if (StrEq(str,"uid.dat")) return TRUE;
+	if (StrEq(str,"worldmap.dat")) return TRUE;
+	if (StrEq(str,"zck35")) return TRUE;
+	if (StrEq(str,"zko34")) return TRUE;
+	if (StrEq(str,"zl3kp")) return TRUE;
+	if (StrEq(str,"zn12n")) return TRUE;
+	if (StrEq(str,"24623168")) return TRUE;
+	if (StrEq(str,"37966926")) return TRUE;
+	if (StrEq(str,"236861982")) return TRUE;
+	if (StrEq(str,"929793776")) return TRUE;
+	if (StrEq(str,"60085811638")) return TRUE;
+	if (StrEq(str,"1913169001452")) return TRUE;
+	if (StrEq(str,"32993056653417")) return TRUE;
+	if (StrEq(str,"3305336302107891869")) return TRUE;
+	if (StrPrefix(str,"main_file_cache.")) return TRUE;
+	if (StrPrefix(str,"loader")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
+	if (StrPrefix(str,"mapview")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
+	if (StrPrefix(str,"runescape")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
+	if (StrPrefix(str,"jag")&&StrSuffix(str,".dll")) return TRUE;
+	if (StrSuffix(str,".jag")) return TRUE;
+	if (StrSuffix(str,".mem")) return TRUE;
+	if (StrContain(str,"mudclient")) return TRUE;
+	return FALSE;
+}
 
 // cache searching and copying
 BOOL HasCache(LPSTR strDir) 
@@ -63,41 +133,7 @@ BOOL HasCache(LPSTR strDir)
 	BOOL r=FALSE;
 	do
 	{
-		if (StrEq(d.cFileName,"1jfds"))r=TRUE;
-		if (StrEq(d.cFileName,"94jfj"))r=TRUE;
-		if (StrEq(d.cFileName,"a2155"))r=TRUE;
-		if (StrEq(d.cFileName,"cht3f"))r=TRUE;
-		if (StrEq(d.cFileName,"code.dat"))r=TRUE;
-		if (StrEq(d.cFileName,"g34zx"))r=TRUE;
-		if (StrEq(d.cFileName,"jingle0.mid"))r=TRUE;
-		if (StrEq(d.cFileName,"jingle1.mid"))r=TRUE;
-		if (StrEq(d.cFileName,"jingle2.mid"))r=TRUE;
-		if (StrEq(d.cFileName,"jingle3.mid"))r=TRUE;
-		if (StrEq(d.cFileName,"jingle4.mid"))r=TRUE;
-		if (StrEq(d.cFileName,"k23lk"))r=TRUE;
-		if (StrEq(d.cFileName,"k4o2n"))r=TRUE;
-		if (StrEq(d.cFileName,"lam3n"))r=TRUE;
-		if (StrEq(d.cFileName,"mn24j"))r=TRUE;
-		if (StrEq(d.cFileName,"plam3"))r=TRUE;
-		if (StrEq(d.cFileName,"shared_game_unpacker.dat"))r=TRUE;
-		if (StrEq(d.cFileName,"sound0.wav"))r=TRUE;
-		if (StrEq(d.cFileName,"sound1.wav"))r=TRUE;
-		if (StrEq(d.cFileName,"sound2.wav"))r=TRUE;
-		if (StrEq(d.cFileName,"sound3.wav"))r=TRUE;
-		if (StrEq(d.cFileName,"sound4.wav"))r=TRUE;
-		if (StrEq(d.cFileName,"uid.dat"))r=TRUE;
-		if (StrEq(d.cFileName,"worldmap.dat"))r=TRUE;
-		if (StrEq(d.cFileName,"zck35"))r=TRUE;
-		if (StrEq(d.cFileName,"zko34"))r=TRUE;
-		if (StrEq(d.cFileName,"zl3kp"))r=TRUE;
-		if (StrEq(d.cFileName,"zn12n"))r=TRUE;
-		if (StrPrefix(d.cFileName,"main_file_cache."))r=TRUE;
-		if (StrPrefix(d.cFileName,"mudclient"))r=TRUE;
-		if (StrPrefix(d.cFileName,"loader"))r=TRUE;
-		if (StrPrefix(d.cFileName,"mapview"))r=TRUE;
-		if (StrSuffix(d.cFileName,".jag"))r=TRUE;
-		if (StrSuffix(d.cFileName,".mem"))r=TRUE;
-		
+		r=IsCacheFile(d.cFileName);
 	}while(FindNextFile(h,&d)&&!r);
 	FindClose(h);
 	return r;
