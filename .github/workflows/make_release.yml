@@ -1,0 +1,51 @@
+name: Make a Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'The name for the release'
+        required: true
+
+jobs:
+  make_release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Download the Source
+      uses: actions/checkout@v2
+    - name: Build the Program
+      shell: cmd
+      run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86
+        rc cache_finder.rc
+        cl cache_extract.cpp user32.lib comdlg32.lib
+        cl -Gm- -GR- -EHa- -Oi -GS- -Gs9999999 cache_finder.cpp /link kernel32.lib shell32.lib user32.lib comdlg32.lib ole32.lib cache_finder.res -nodefaultlib -subsystem:windows -stack:0x100000,0x100000
+        cl win95_edit.cpp
+        win95_edit.exe cache_finder.exe
+    - name: Make a Release
+      id: ReleaseID
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.inputs.name }}
+        release_name: ${{ github.event.inputs.name }}
+    - name: Upload the Files 1
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.ReleaseID.outputs.upload_url }}
+        asset_path: cache_finder.exe
+        asset_name: RunescapeCacheFinder.exe
+        asset_content_type: application/octet-stream
+    - name: Upload the Files 2
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.ReleaseID.outputs.upload_url }}
+        asset_path: cache_extract.exe
+        asset_name: ExtractTool.exe
+        asset_content_type: application/octet-stream
