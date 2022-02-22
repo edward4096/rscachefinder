@@ -75,7 +75,7 @@ CAPTION "Cache Finder"
 FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "This program will locate Runescape caches on your disk.\r\nClick 'Scan' to start. This may take a long time.",
-                    IDC_STATIC,10,8,209,19,SS_NOPREFIX
+                    IDC_STATIC,37,7,183,19,SS_NOPREFIX
     DEFPUSHBUTTON   "Scan",IDOK,158,30,58,16,WS_GROUP
     LTEXT           "Status:",IDC_STATIC,10,58,27,9
     LTEXT           "Not running",IDC_STATUS,40,55,176,16,0,WS_EX_CLIENTEDGE
@@ -84,6 +84,7 @@ BEGIN
     GROUPBOX        "Save output to:",IDC_STATIC,7,80,215,32
     EDITTEXT        IDC_DISK,64,32,16,14,ES_AUTOHSCROLL
     LTEXT           "Disk to search:",IDC_STATIC,10,34,47,13
+    ICON            IDI_CACHE_FINDER,IDC_STATIC,9,6,20,20
 END
 
 
