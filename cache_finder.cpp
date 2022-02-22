@@ -1,6 +1,6 @@
 
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "stdafx.h"
 #include <shellapi.h>
 #include <shlobj.h>
 #include "resource.h"
@@ -9,6 +9,7 @@
 //globals
 INT nDirCheck=0;
 HANDLE hOut=INVALID_HANDLE_VALUE;
+CHAR strDisk[2];
 BOOL bSuccess=FALSE;
 
 
@@ -240,15 +241,12 @@ DWORD CALLBACK Scan(LPVOID lpParam)
 	
 	CHAR strBuf[30];
 	HWND hDlg=(HWND)lpParam;
-	for (char c='C';c<='Z';c++)
-	{
-		strBuf[0]=c;
-		strBuf[1]=':';
-		strBuf[2]='\\';
-		strBuf[3]='*';
-		strBuf[4]=0;
-		ScanDir(strBuf);
-	}
+	strBuf[0]=(strDisk[0]>='a'&&strDisk[0]<='z')||(strDisk[0]>='A'&&strDisk[0]<='Z')?strDisk[0]:'c';
+	strBuf[1]=':';
+	strBuf[2]='\\';
+	strBuf[3]='*';
+	strBuf[4]=0;
+	ScanDir(strBuf);
 	PostMessage(hDlg,WM_APP,0,0);
 	return 0;
 }
@@ -271,6 +269,7 @@ LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				StrCat(strPath,"C:\\RunescapeCaches");
 			}
 			SetWindowText(GetDlgItem(hDlg,IDC_OUTPATH),strPath);	
+			SetWindowText(GetDlgItem(hDlg,IDC_DISK),"C");
 			return TRUE;
 
 		case WM_COMMAND:
@@ -282,6 +281,7 @@ LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			if (LOWORD(wParam) == IDOK)
 			{
 				GetWindowText(GetDlgItem(hDlg,IDC_OUTPATH),strPath,sizeof strPath);
+				GetWindowText(GetDlgItem(hDlg,IDC_DISK),strDisk,sizeof strDisk);
 				CreateDirectory(strPath,0);
 				StrCat(strPath,"\\RSCaches.dat");
 				hOut = CreateFile(strPath,GENERIC_READ|GENERIC_WRITE,0,0,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,0);
@@ -292,8 +292,9 @@ LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 					ExitProcess(1);
 				}
 				SetTimer(hDlg,10/*id*/,1000,0);
-				SetWindowText(GetDlgItem(hDlg,IDC_STATUS),"Looking for caches...\r\nThis will take a long time.");
+				SetWindowText(GetDlgItem(hDlg,IDC_STATUS),"Looking for caches...");
 				EnableWindow(GetDlgItem(hDlg,IDOK),FALSE);
+				EnableWindow(GetDlgItem(hDlg,IDC_DISK),FALSE);
 				EnableWindow(GetDlgItem(hDlg,IDC_PICKPATH),FALSE);
 				CloseHandle(CreateThread(0,0,Scan,hDlg,0,0));
 			}else if (LOWORD(wParam)==IDC_PICKPATH)
@@ -322,7 +323,7 @@ LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			{
 				if (nDirCheck)
 				{
-					CHAR strBuf[100]="Looking for caches...\r\nThis will take a long time.\r\nFolders checked:\r\n        ";
+					CHAR strBuf[100]="Looking for caches... Folders checked:        ";
 					int nPos=StrLen(strBuf);
 					int i=nDirCheck;
 					while (i)

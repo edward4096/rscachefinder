@@ -69,19 +69,21 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 22, 17, 230, 106
+IDD_ABOUTBOX DIALOGEX 22, 17, 230, 119
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "Cache Finder"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LTEXT           "This program will locate Runescape caches on your disk. ",
-                    IDC_STATIC,7,7,119,19,SS_NOPREFIX
-    DEFPUSHBUTTON   "Scan",IDOK,33,33,58,16,WS_GROUP
-    LTEXT           "Status:",IDC_STATIC,137,9,64,9
-    LTEXT           "Not running",IDC_STATUS,137,22,81,35,0,WS_EX_CLIENTEDGE
-    PUSHBUTTON      "&Change",IDC_PICKPATH,163,75,48,16
-    LTEXT           "Static",IDC_OUTPATH,10,80,138,11
-    GROUPBOX        "Save output to:",IDC_STATIC,3,65,215,32
+    LTEXT           "This program will locate Runescape caches on your disk.\r\nClick 'Scan' to start. This may take a long time.",
+                    IDC_STATIC,10,8,209,19,SS_NOPREFIX
+    DEFPUSHBUTTON   "Scan",IDOK,158,30,58,16,WS_GROUP
+    LTEXT           "Status:",IDC_STATIC,10,58,27,9
+    LTEXT           "Not running",IDC_STATUS,40,55,176,16,0,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "&Change",IDC_PICKPATH,168,90,48,16
+    LTEXT           "Static",IDC_OUTPATH,15,95,138,11
+    GROUPBOX        "Save output to:",IDC_STATIC,7,80,215,32
+    EDITTEXT        IDC_DISK,64,32,16,14,ES_AUTOHSCROLL
+    LTEXT           "Disk to search:",IDC_STATIC,10,34,47,13
 END
 
 
@@ -111,22 +113,6 @@ BEGIN
     "resource.h\0"
 END
 
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
-BEGIN
-    IDD_ABOUTBOX, DIALOG
-    BEGIN
-        BOTTOMMARGIN, 98
-    END
-END
 #endif    // APSTUDIO_INVOKED
 
 
