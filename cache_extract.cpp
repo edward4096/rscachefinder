@@ -2,8 +2,26 @@
 //
 
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "stdafx.h"
 #include <commdlg.h>
+
+HANDLE hIn;
+
+CHAR Peek()
+{
+	CHAR c;
+	DWORD r;
+	ReadFile(hIn,&c,1,&r,0);
+	SetFilePointer(hIn,-1,0,FILE_CURRENT);
+	return r==1?c:0;
+}
+
+BOOL Read(void*pOut,DWORD nBytes) 
+{
+	DWORD r;
+	ReadFile(hIn,pOut,nBytes,&r,0);
+	return r==nBytes;
+}
 
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -23,28 +41,29 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	f.Flags=OFN_PATHMUSTEXIST|OFN_FILEMUSTEXIST;
 	if (GetOpenFileName(&f))
 	{
-		HANDLE hIn = CreateFile(f.lpstrFile,GENERIC_READ,0,0,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,0);
+		hIn = CreateFile(f.lpstrFile,GENERIC_READ,0,0,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,0);
 		if (hIn == INVALID_HANDLE_VALUE)
 		{
 			MessageBox(NULL,"Cannot access file",NULL,MB_OK);
 			return 1;
 		}
-		DWORD size = GetFileSize(hIn,NULL);
-		char*buf=(char*)HeapAlloc(GetProcessHeap(),0,size);
-		ReadFile(hIn,buf,size,&size,0);
-		CloseHandle(hIn);
 		DWORD pos = 0;
 		DWORD index = 0;
-		while (pos<size)
+		while (TRUE)
 		{
-			if(buf[pos]==(char)0xff)
+			if(Peek()==(char)0xff)
 			{
 				index += 1;
-				pos += 1;
+				CHAR c;
+				Read(&c,1);
 			}
 			else
 			{
-				
+				WIN32_FIND_DATA d;
+				if (!Read(&d,sizeof d))
+				{
+					break;
+				}
 				CHAR b[300];
 				b[0]='c';
 				b[1]='a';
@@ -54,18 +73,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 				b[5]='0'+(char)index;
 				b[6]=0;
 				CreateDirectory(b,0);
-				WIN32_FIND_DATA d;
-				if (pos+sizeof d>size)
-				{
-					break;
-				}
 				b[6]='\\';
-				CopyMemory(&d,&buf[pos],sizeof d);
-				pos+=sizeof d;
-				if (pos+d.nFileSizeLow>size)
-				{
-					break;
-				}
 				for (int i=0;d.cFileName[i]&&i<sizeof d.cFileName;i+=1)
 				{
 					b[7+i]=d.cFileName[i];
@@ -79,10 +87,18 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 					return 1;
 				}
 				DWORD br;
-				WriteFile(hOut,&buf[pos],d.nFileSizeLow,&br,0);
+				CHAR buf[1000];
+				DWORD pos=0;
+				while (pos<d.nFileSizeLow)
+				{
+					DWORD left=d.nFileSizeLow-pos;
+					br=left>sizeof buf?sizeof buf:left;
+					Read(buf,br);
+					pos+=br;
+					WriteFile(hOut,buf,br,&br,0);
+				}
 				SetFileTime(hOut,&d.ftCreationTime,&d.ftLastAccessTime,&d.ftLastWriteTime);
 				CloseHandle(hOut);
-				pos+=d.nFileSizeLow;
 			}
 		}
 		MessageBox(NULL,"All complete.","Extract",MB_OK);
