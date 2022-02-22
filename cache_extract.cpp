@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include <commdlg.h>
+#include <stdio.h>
 
 HANDLE hIn;
 
@@ -63,21 +64,12 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 				{
 					break;
 				}
-				CHAR b[300];
-				b[0]='c';
-				b[1]='a';
-				b[2]='c';
-				b[3]='h';
-				b[4]='e';
-				b[5]='0'+(char)index;
-				b[6]=0;
+				CHAR b[1000];
+				snprintf(b,sizeof b,"cache%d",index);
 				CreateDirectory(b,0);
-				b[6]='\\';
-				for (int i=0;d.cFileName[i]&&i<sizeof d.cFileName;i+=1)
-				{
-					b[7+i]=d.cFileName[i];
-					b[8+i]=0;
-				}
+				strcat(b,"\\");
+				d.cFileName[sizeof(d.cFileName)-1]=0;//make sure it ends with NUL
+				strcat(b,d.cFileName);
 				HANDLE hOut=CreateFile(b,GENERIC_WRITE|GENERIC_READ,0,0,CREATE_NEW,FILE_ATTRIBUTE_NORMAL,0);
 				if (hOut == INVALID_HANDLE_VALUE)
 				{
