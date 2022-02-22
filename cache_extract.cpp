@@ -1,7 +1,6 @@
 // cache_extract.cpp : Defines the entry point for the application.
 //
 
-#define WIN32_LEAN_AND_MEAN
 #include "stdafx.h"
 #include <commdlg.h>
 
@@ -87,13 +86,30 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 					return 1;
 				}
 				DWORD br;
-				CHAR buf[1000];
+				CHAR buf[1<<12];
+				while (d.nFileSizeHigh)
+				{
+					d.nFileSizeHigh-=1;
+					for (int i=0;i<1<<(32-12);i+=1)
+					{
+						if (!Read(buf,sizeof buf))
+						{
+							d.nFileSizeHigh=0;
+							d.nFileSizeLow=0;
+							break;
+						}
+						WriteFile(hOut,buf,sizeof buf,&br,0);
+					}
+				}
 				DWORD pos=0;
 				while (pos<d.nFileSizeLow)
 				{
 					DWORD left=d.nFileSizeLow-pos;
 					br=left>sizeof buf?sizeof buf:left;
-					Read(buf,br);
+					if (!Read(buf,br))
+					{
+						break;
+					}
 					pos+=br;
 					WriteFile(hOut,buf,br,&br,0);
 				}
