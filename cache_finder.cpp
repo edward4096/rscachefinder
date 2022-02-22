@@ -71,6 +71,15 @@ BOOL StrContain(LPSTR a, LPSTR c)
 	}
 	return FALSE;
 }
+#pragma function(memset)
+void *memset(void *pDest, int iValue, size_t nBytes)
+{
+	for (int i=0;i<nBytes;i+=1)
+	{
+		((CHAR*)pDest)[i]=iValue;
+	}
+	return pDest;
+}
 
 // files to always archive
 BOOL IsCacheFile(LPSTR str)
