@@ -165,7 +165,7 @@ BOOL HasCache(LPSTR strDir)
 }
 void LookIn(LPSTR strDir,BOOL bIsCacheDir)
 {
-	if (!bIsCacheDir&&!HasCache(strDir))
+	if (!HasCache(strDir))
 	{
 		return;//do not copy
 	}
