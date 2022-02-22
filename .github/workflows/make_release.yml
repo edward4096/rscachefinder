@@ -17,7 +17,7 @@ jobs:
     - name: Build the Program
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86
         rc cache_finder.rc
         cl cache_extract.cpp user32.lib comdlg32.lib
         cl -Gm- -GR- -EHa- -Oi -GS- -Gs9999999 -O1 cache_finder.cpp /link kernel32.lib shell32.lib user32.lib comdlg32.lib ole32.lib cache_finder.res -nodefaultlib -subsystem:windows -stack:0x10000,0x10000
