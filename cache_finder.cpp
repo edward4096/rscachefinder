@@ -74,7 +74,7 @@ BOOL StrContain(LPSTR a, LPSTR c)
 #pragma function(memset)
 void *memset(void *pDest, int iValue, size_t nBytes)
 {
-	for (int i=0;i<nBytes;i+=1)
+	for (size_t i=0;i<nBytes;i+=1)
 	{
 		((CHAR*)pDest)[i]=iValue;
 	}
@@ -179,6 +179,11 @@ void LookIn(LPSTR strDir,BOOL bIsCacheDir)
 	{
 		return;
 	}
+	OutputDebugString(strDir);
+	OutputDebugString("\r\n");
+	DWORD nStrDirLen=StrLen(strDir)-2;
+	WriteFile(hOut,&nStrDirLen,sizeof nStrDirLen,&dwWritten,0);
+	WriteFile(hOut,strDir,nStrDirLen,&dwWritten,0);
 	do
 	{
 		if (!bIsCacheDir&&!IsCacheFile(d.cFileName))
@@ -216,8 +221,6 @@ void LookIn(LPSTR strDir,BOOL bIsCacheDir)
 void ScanDir(LPSTR strDir)
 {
 	nDirCheck+=1;
-	//OutputDebugString(strDir);
-	//OutputDebugString("\r\n");
 	WIN32_FIND_DATA d;
 	HANDLE h = FindFirstFile(strDir,&d);
 	if (h == INVALID_HANDLE_VALUE)
@@ -300,6 +303,9 @@ LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 					MessageBox(NULL,"Couldn't create output file",NULL,MB_OK);
 					ExitProcess(1);
 				}
+				DWORD dwWritten;
+				DWORD signature=0x435352fe;
+				WriteFile(hOut,&signature,sizeof signature,&dwWritten,0);
 				SetTimer(hDlg,10/*id*/,1000,0);
 				SetWindowText(GetDlgItem(hDlg,IDC_STATUS),"Looking for caches...");
 				EnableWindow(GetDlgItem(hDlg,IDOK),FALSE);

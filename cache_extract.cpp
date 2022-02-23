@@ -7,9 +7,9 @@
 
 HANDLE hIn;
 
-CHAR Peek()
+BYTE Peek()
 {
-	CHAR c;
+	BYTE c;
 	DWORD r;
 	ReadFile(hIn,&c,1,&r,0);
 	SetFilePointer(hIn,-1,0,FILE_CURRENT);
@@ -47,15 +47,58 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 			MessageBox(NULL,"Cannot access file",NULL,MB_OK);
 			return 1;
 		}
+		DWORD signature;
+		BOOL bNewVersion=Peek()==0xfe;
+		if (bNewVersion)
+		{
+			if (!Read(&signature,sizeof signature) || signature!=0x435352fe)
+			{
+				MessageBox(NULL,"Bad signature. This isn't a cache file!",NULL,MB_OK);
+				return 1;
+			}
+		}
 		DWORD pos = 0;
 		DWORD index = 0;
+		BOOL bGetDirPath=TRUE;
+		CHAR strDir[300];
+		CHAR *strAppend="";
 		while (TRUE)
 		{
-			if(Peek()==(char)0xff)
+			if (bGetDirPath&&bNewVersion)
+			{
+				bGetDirPath=FALSE;
+				DWORD nLen;
+				if (!Read(&nLen,sizeof nLen)||nLen>=sizeof strDir||!Read(strDir,nLen))
+				{
+					break;
+				}
+				strDir[nLen]=0;
+				for (int i=0;strDir[i];i+=1)
+				{
+					if (strDir[i]=='\\')
+					{
+						strDir[i]=' ';
+						strAppend=&strDir[i];
+					}
+					else if((strDir[i]>='A'&&strDir[i]<='Z')
+						||(strDir[i]>='a'&&strDir[i]<='z')
+						||(strDir[i]>='0'&&strDir[i]<='9')
+						||strDir[i]=='_'||strDir[i]==' ')
+					{
+						//okay
+					}
+					else
+					{
+						strDir[i]='_'; //replace char not allowed in path
+					}
+				}
+			}
+			if(Peek()==0xff)
 			{
 				index += 1;
 				CHAR c;
 				Read(&c,1);
+				bGetDirPath=TRUE;
 			}
 			else
 			{
@@ -65,7 +108,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 					break;
 				}
 				CHAR b[1000];
-				snprintf(b,sizeof b,"cache%d",index);
+				sprintf(b,"cache%d%s",index,strAppend);
 				CreateDirectory(b,0);
 				strcat(b,"\\");
 				d.cFileName[sizeof(d.cFileName)-1]=0;//make sure it ends with NUL
