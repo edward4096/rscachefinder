@@ -123,6 +123,7 @@ BOOL IsCacheFile(LPSTR str)
 	if (StrPrefix(str,"loader")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
 	if (StrPrefix(str,"mapview")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
 	if (StrPrefix(str,"runescape")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
+	if (StrPrefix(str,"loginapplet")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
 	if (StrPrefix(str,"jag")&&StrSuffix(str,".dll")) return TRUE;
 	if (StrSuffix(str,".jag")) return TRUE;
 	if (StrSuffix(str,".mem")) return TRUE;
