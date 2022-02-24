@@ -13,21 +13,20 @@ CHAR strDisk[2];
 BOOL bSuccess=FALSE;
 
 
-
 //strings
-void StrCat(LPSTR d, LPSTR s)
+void StrCat(LPSTR d, const CHAR*s)
 {
 	while(*d)d++;
 	while(*s)*d++=*s++;
 	*d=0;
 }
-DWORD StrLen(LPSTR s)
+DWORD StrLen(const CHAR*s)
 {
-	LPSTR t = s;
+	const CHAR*t = s;
 	while(*s)s++;
 	return s-t;
 }
-BOOL StrEq(LPSTR a, LPSTR b)
+BOOL StrEq(const CHAR*a, const CHAR*b)
 {
 	int i=0;
 	while(a[i])
@@ -37,11 +36,11 @@ BOOL StrEq(LPSTR a, LPSTR b)
 	}
 	return a[i]==b[i];
 }
-BOOL StrSuffix(LPSTR a, LPSTR suffix)
+BOOL StrSuffix(const CHAR*a, const CHAR*suffix)
 {
 	return StrLen(a)>StrLen(suffix)&&StrEq(a+StrLen(a)-StrLen(suffix),suffix);
 }
-BOOL StrPrefix(LPSTR a, LPSTR prefix)
+BOOL StrPrefix(const CHAR*a, const CHAR*prefix)
 {
 	int i=0;
 	while(prefix[i])
@@ -51,7 +50,7 @@ BOOL StrPrefix(LPSTR a, LPSTR prefix)
 	}
 	return TRUE;
 }
-BOOL StrContain(LPSTR a, LPSTR c)
+BOOL StrContain(const CHAR*a, const CHAR*c)
 {
 	for(int i=0;a[i];i+=1)
 	{
@@ -146,6 +145,42 @@ BOOL IsCacheDir(LPSTR str)
 	return FALSE;
 }
 
+// errors handling helpers
+void Error(const CHAR*strErr,BOOL bUseLastError)
+{
+	CHAR strBuf[200];
+	LPSTR strMessage;
+	if (bUseLastError&&FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,0,GetLastError(),0,(LPSTR)&strMessage,0,0))
+	{
+		strBuf[0]=0;
+		StrCat(strBuf,strErr);
+		StrCat(strBuf,": ");
+		if (StrLen(strBuf)+StrLen(strMessage)<sizeof strBuf-1)
+		{
+			StrCat(strBuf,strMessage);
+			MessageBox(NULL,strBuf,NULL,MB_OK);
+		}
+		else
+		{
+			MessageBox(NULL,strErr,NULL,MB_OK);
+		}
+	}
+	else
+	{
+		MessageBox(NULL,strErr,NULL,MB_OK);
+	}
+	ExitProcess(1);
+}
+void Write(const LPVOID pBuf, DWORD nBytes)
+{
+	DWORD dwWritten;
+	if (!WriteFile(hOut,pBuf,nBytes,&dwWritten,0)||dwWritten!=nBytes)
+	{
+		Error("Couldn't write output file",TRUE);
+	}
+}
+
+
 // cache searching and copying
 BOOL HasCache(LPSTR strDir) 
 {
@@ -169,11 +204,9 @@ void LookIn(LPSTR strDir,BOOL bIsCacheDir)
 	{
 		return;//do not copy
 	}
-	CHAR strBuf2[300];
 	CHAR copyBuf[1000];
 	WIN32_FIND_DATA d;
 	HANDLE h = FindFirstFile(strDir,&d);
-	DWORD dwWritten;
 	DWORD dwRead;
 	if (h == INVALID_HANDLE_VALUE)
 	{
@@ -182,40 +215,50 @@ void LookIn(LPSTR strDir,BOOL bIsCacheDir)
 	OutputDebugString(strDir);
 	OutputDebugString("\r\n");
 	DWORD nStrDirLen=StrLen(strDir)-2;
-	WriteFile(hOut,&nStrDirLen,sizeof nStrDirLen,&dwWritten,0);
-	WriteFile(hOut,strDir,nStrDirLen,&dwWritten,0);
+	Write(&nStrDirLen,sizeof nStrDirLen);
+	Write(strDir,nStrDirLen);
 	do
 	{
 		if (!bIsCacheDir&&!IsCacheFile(d.cFileName))
 		{
 			continue;
 		}
+		CHAR*strBuf2=(CHAR*)HeapAlloc(GetProcessHeap(),0,StrLen(strDir)+StrLen(d.cFileName)+10);
+		if (!strBuf2)
+		{
+			Error("Out of memory",TRUE);
+		}
 		strBuf2[0]=0;
 		StrCat(strBuf2,strDir);
 		strBuf2[StrLen(strBuf2)-1]=0;
 		StrCat(strBuf2,d.cFileName);
 		HANDLE hIn = CreateFile(strBuf2,GENERIC_READ,0,0,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,0);
+		HeapFree(GetProcessHeap(),0,strBuf2);
 		if (hIn != INVALID_HANDLE_VALUE)
 		{
-			WriteFile(hOut,&d,sizeof d,&dwWritten,0);
+			d.nFileSizeLow=GetFileSize(hIn,&d.nFileSizeHigh);
+			Write(&d,sizeof d);
 			while (true)
 			{
-				ReadFile(hIn,copyBuf,sizeof copyBuf,&dwRead,0);
+				if (!ReadFile(hIn,copyBuf,sizeof copyBuf,&dwRead,0))
+				{
+					Error("Couldn't copy file into archive",TRUE);
+				}
 				if (dwRead == 0)
 				{
 					break;
 				}
 				else
 				{
-					WriteFile(hOut,copyBuf,dwRead,&dwWritten,0);
+					Write(copyBuf,dwRead);
 				}
 			}
 			CloseHandle(hIn);
 		}
 	}while(FindNextFile(h,&d));
 	FindClose(h);
-	strBuf2[0]=(char)0xff;
-	WriteFile(hOut,strBuf2,1,&dwWritten,0);
+	BYTE b=0xff;
+	Write(&b,1);
 	bSuccess=TRUE;
 }
 void ScanDir(LPSTR strDir)
@@ -227,13 +270,17 @@ void ScanDir(LPSTR strDir)
 	{
 		return;
 	}
-	CHAR*strBuf=(CHAR*)HeapAlloc(GetProcessHeap(),0,300);
 	do
 	{
 		if ((d.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)
 			&& !StrEq(d.cFileName,".")
 			&& !StrEq(d.cFileName,".."))
 		{
+			CHAR*strBuf=(CHAR*)HeapAlloc(GetProcessHeap(),0,StrLen(strDir)+StrLen(d.cFileName)+10);
+			if (!strBuf)
+			{
+				Error("Out of memory",FALSE);
+			}
 			strBuf[0]=0;
 			StrCat(strBuf,strDir);
 			strBuf[StrLen(strBuf)-1]=0;
@@ -242,10 +289,10 @@ void ScanDir(LPSTR strDir)
 			StrCat(strBuf,"\\*");
 			LookIn(strBuf,bIsCacheDir);
 			ScanDir(strBuf);
+			HeapFree(GetProcessHeap(),0,strBuf);
 		}
 	}while(FindNextFile(h,&d));
 	FindClose(h);
-	HeapFree(GetProcessHeap(),0,strBuf);
 }
 
 DWORD CALLBACK Scan(LPVOID lpParam)
@@ -263,7 +310,7 @@ DWORD CALLBACK Scan(LPVOID lpParam)
 	return 0;
 }
 
-// user intreface
+// user interface
 LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	CHAR strPath[300];
@@ -273,7 +320,16 @@ LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		case WM_INITDIALOG:
 			if (GetEnvironmentVariable("userprofile",strPath,sizeof strPath))
 			{
-				StrCat(strPath,"\\Desktop\\RunescapeCaches");
+				const CHAR*strAppend="\\Desktop\\RunescapeCaches";
+				if (StrLen(strPath)+StrLen(strAppend)<sizeof strPath-1)
+				{
+					StrCat(strPath,strAppend);
+				}
+				else
+				{
+					strPath[0]=0;
+					StrCat(strPath,"C:\\RunescapeCaches");
+				}
 			}
 			else
 			{
@@ -295,17 +351,19 @@ LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				GetWindowText(GetDlgItem(hDlg,IDC_OUTPATH),strPath,sizeof strPath);
 				GetWindowText(GetDlgItem(hDlg,IDC_DISK),strDisk,sizeof strDisk);
 				CreateDirectory(strPath,0);
-				StrCat(strPath,"\\RSCaches.dat");
+				const CHAR*strAppend="\\RSCaches.dat";
+				if (StrLen(strPath)+StrLen(strAppend)>=sizeof strPath-1)
+				{
+					Error("Output path too long",FALSE);
+				}
+				StrCat(strPath,strAppend);
 				hOut = CreateFile(strPath,GENERIC_READ|GENERIC_WRITE,0,0,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,0);
 				if (hOut == INVALID_HANDLE_VALUE)
 				{
-					int x = GetLastError();
-					MessageBox(NULL,"Couldn't create output file",NULL,MB_OK);
-					ExitProcess(1);
+					Error("Couldn't create output file",TRUE);
 				}
-				DWORD dwWritten;
 				DWORD signature=0x435352fe;
-				WriteFile(hOut,&signature,sizeof signature,&dwWritten,0);
+				Write(&signature,sizeof signature);
 				SetTimer(hDlg,10/*id*/,1000,0);
 				SetWindowText(GetDlgItem(hDlg,IDC_STATUS),"Looking for caches...");
 				EnableWindow(GetDlgItem(hDlg,IDOK),FALSE);
@@ -326,9 +384,12 @@ LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				ITEMIDLIST*pOut=SHBrowseForFolder(&bi);
 				if (pOut)
 				{
-					SHGetPathFromIDList(pOut,strPath);
+					BOOL bOkay = SHGetPathFromIDList(pOut,strPath);
 					CoTaskMemFree(pOut);
-					SetWindowText(GetDlgItem(hDlg,IDC_OUTPATH),strPath);
+					if (bOkay)
+					{
+						SetWindowText(GetDlgItem(hDlg,IDC_OUTPATH),strPath);
+					}
 				}
 			}
 			break;
