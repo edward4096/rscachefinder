@@ -314,24 +314,43 @@ DWORD CALLBACK Scan(LPVOID lpParam)
 LRESULT CALLBACK MainDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	CHAR strPath[300];
+	BOOL gotDefPath;
 
 	switch (message)
 	{
 		case WM_INITDIALOG:
-			if (GetEnvironmentVariable("userprofile",strPath,sizeof strPath))
+			gotDefPath=FALSE;
+			if (GetModuleFileName(NULL,strPath,sizeof strPath))
+			{
+				for (int i=StrLen(strPath);i>0;i--)
+				{
+					if (strPath[i]=='\\')
+					{
+						strPath[i]=0;
+						break;
+					}
+				}
+				const CHAR*strAppend="\\RunescapeCaches";
+				if (StrLen(strPath)+StrLen(strAppend)<sizeof strPath-1)
+				{
+					gotDefPath=TRUE;
+					StrCat(strPath,strAppend);
+				}
+			}
+			if (gotDefPath&&!CreateDirectory(strPath,NULL)) {
+				// the directory already exists or is not writable, don't use it
+				gotDefPath=FALSE;
+			}
+			if (!gotDefPath&&GetEnvironmentVariable("userprofile",strPath,sizeof strPath))
 			{
 				const CHAR*strAppend="\\Desktop\\RunescapeCaches";
 				if (StrLen(strPath)+StrLen(strAppend)<sizeof strPath-1)
 				{
+					gotDefPath=TRUE;
 					StrCat(strPath,strAppend);
 				}
-				else
-				{
-					strPath[0]=0;
-					StrCat(strPath,"C:\\RunescapeCaches");
-				}
 			}
-			else
+			if (!gotDefPath)
 			{
 				strPath[0]=0;
 				StrCat(strPath,"C:\\RunescapeCaches");
