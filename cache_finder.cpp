@@ -83,22 +83,22 @@ void *memset(void *pDest, int iValue, size_t nBytes)
 // files to always archive
 BOOL IsCacheFile(LPSTR str)
 {
-	if (StrEq(str,"1jfds")) return TRUE;
-	if (StrEq(str,"94jfj")) return TRUE;
-	if (StrEq(str,"a2155")) return TRUE;
-	if (StrEq(str,"cht3f")) return TRUE;
+	if (StrPrefix(str,"1jfds")) return TRUE;
+	if (StrPrefix(str,"94jfj")) return TRUE;
+	if (StrPrefix(str,"a2155")) return TRUE;
+	if (StrPrefix(str,"cht3f")) return TRUE;
 	if (StrEq(str,"code.dat")) return TRUE;
-	if (StrEq(str,"g34zx")) return TRUE;
+	if (StrPrefix(str,"g34zx")) return TRUE;
 	if (StrEq(str,"jingle0.mid")) return TRUE;
 	if (StrEq(str,"jingle1.mid")) return TRUE;
 	if (StrEq(str,"jingle2.mid")) return TRUE;
 	if (StrEq(str,"jingle3.mid")) return TRUE;
 	if (StrEq(str,"jingle4.mid")) return TRUE;
-	if (StrEq(str,"k23lk")) return TRUE;
-	if (StrEq(str,"k4o2n")) return TRUE;
-	if (StrEq(str,"lam3n")) return TRUE;
-	if (StrEq(str,"mn24j")) return TRUE;
-	if (StrEq(str,"plam3")) return TRUE;
+	if (StrPrefix(str,"k23lk")) return TRUE;
+	if (StrPrefix(str,"k4o2n")) return TRUE;
+	if (StrPrefix(str,"lam3n")) return TRUE;
+	if (StrPrefix(str,"mn24j")) return TRUE;
+	if (StrPrefix(str,"plam3")) return TRUE;
 	if (StrEq(str,"shared_game_unpacker.dat")) return TRUE;
 	if (StrEq(str,"sound0.wav")) return TRUE;
 	if (StrEq(str,"sound1.wav")) return TRUE;
@@ -106,18 +106,18 @@ BOOL IsCacheFile(LPSTR str)
 	if (StrEq(str,"sound3.wav")) return TRUE;
 	if (StrEq(str,"sound4.wav")) return TRUE;
 	if (StrEq(str,"worldmap.dat")) return TRUE;
-	if (StrEq(str,"zck35")) return TRUE;
-	if (StrEq(str,"zko34")) return TRUE;
-	if (StrEq(str,"zl3kp")) return TRUE;
-	if (StrEq(str,"zn12n")) return TRUE;
-	if (StrEq(str,"24623168")) return TRUE;
-	if (StrEq(str,"37966926")) return TRUE;
-	if (StrEq(str,"236861982")) return TRUE;
-	if (StrEq(str,"929793776")) return TRUE;
-	if (StrEq(str,"60085811638")) return TRUE;
-	if (StrEq(str,"1913169001452")) return TRUE;
-	if (StrEq(str,"32993056653417")) return TRUE;
-	if (StrEq(str,"3305336302107891869")) return TRUE;
+	if (StrPrefix(str,"zck35")) return TRUE;
+	if (StrPrefix(str,"zko34")) return TRUE;
+	if (StrPrefix(str,"zl3kp")) return TRUE;
+	if (StrPrefix(str,"zn12n")) return TRUE;
+	if (StrPrefix(str,"24623168")) return TRUE;
+	if (StrPrefix(str,"37966926")) return TRUE;
+	if (StrPrefix(str,"236861982")) return TRUE;
+	if (StrPrefix(str,"929793776")) return TRUE;
+	if (StrPrefix(str,"60085811638")) return TRUE;
+	if (StrPrefix(str,"1913169001452")) return TRUE;
+	if (StrPrefix(str,"32993056653417")) return TRUE;
+	if (StrPrefix(str,"3305336302107891869")) return TRUE;
 	if (StrPrefix(str,"main_file_cache.")) return TRUE;
 	if (StrPrefix(str,"loader")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
 	if (StrPrefix(str,"mapview")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
@@ -125,8 +125,10 @@ BOOL IsCacheFile(LPSTR str)
 	if (StrPrefix(str,"loginapplet")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
 	if (StrPrefix(str,"jag")&&StrSuffix(str,".dll")) return TRUE;
 	if (StrSuffix(str,".jag")) return TRUE;
-	if (StrSuffix(str,".mem")) return TRUE;
+	if (StrSuffix(str,".mem"))&&(StrPrefix(str,"entity")||(StrPrefix(str,"land")||(StrPrefix(str,"maps")||(StrPrefix(str,"sounds"))) return TRUE;
 	if (StrContain(str,"mudclient")) return TRUE;
+	if (StrContain(str,".jag-")) return TRUE;
+	if (StrContain(str,".mem-")) return TRUE;
 	return FALSE;
 }
 // directories to always archive
