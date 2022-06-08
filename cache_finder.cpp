@@ -125,7 +125,7 @@ BOOL IsCacheFile(LPSTR str)
 	if (StrPrefix(str,"loginapplet")&&(StrSuffix(str,".jar")||StrSuffix(str,".cab")||StrSuffix(str,".zip"))) return TRUE;
 	if (StrPrefix(str,"jag")&&StrSuffix(str,".dll")) return TRUE;
 	if (StrSuffix(str,".jag")) return TRUE;
-	if (StrSuffix(str,".mem"))&&(StrPrefix(str,"entity")||(StrPrefix(str,"land")||(StrPrefix(str,"maps")||(StrPrefix(str,"sounds"))) return TRUE;
+	if (StrSuffix(str,".mem")&&(StrPrefix(str,"entity")||(StrPrefix(str,"land")||(StrPrefix(str,"maps")||(StrPrefix(str,"sounds"))) return TRUE;
 	if (StrContain(str,"mudclient")) return TRUE;
 	if (StrContain(str,".jag-")) return TRUE;
 	if (StrContain(str,".mem-")) return TRUE;
