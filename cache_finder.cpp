@@ -100,11 +100,6 @@ BOOL IsCacheFile(LPSTR str)
 	if (StrPrefix(str,"mn24j")) return TRUE;
 	if (StrPrefix(str,"plam3")) return TRUE;
 	if (StrEq(str,"shared_game_unpacker.dat")) return TRUE;
-	if (StrEq(str,"sound0.wav")) return TRUE;
-	if (StrEq(str,"sound1.wav")) return TRUE;
-	if (StrEq(str,"sound2.wav")) return TRUE;
-	if (StrEq(str,"sound3.wav")) return TRUE;
-	if (StrEq(str,"sound4.wav")) return TRUE;
 	if (StrEq(str,"worldmap.dat")) return TRUE;
 	if (StrPrefix(str,"zck35")) return TRUE;
 	if (StrPrefix(str,"zko34")) return TRUE;
@@ -144,6 +139,7 @@ BOOL IsCacheDir(LPSTR str)
 	if (StrSuffix(str,"\\oldschool\\LIVE")) return TRUE;
 	if (StrSuffix(str,"\\runescape\\LIVE")) return TRUE;
 	if (StrSuffix(str,"\\runescape\\LIVE_BETA")) return TRUE;
+	if (StrSuffix(str,"\\cache-93423-17382-59373-28323")) return TRUE;
 	return FALSE;
 }
 
