@@ -50,6 +50,24 @@ BOOL StrPrefix(const CHAR*a, const CHAR*prefix)
 	}
 	return TRUE;
 }
+BOOL StrPrefixThenNoLettersOrDot(const CHAR*a, const CHAR*prefix)
+{
+    int i=0;
+    while(prefix[i])
+    {
+        if(a[i]!=prefix[i]){return FALSE;}
+        else {i+=1;}
+    }
+    if(!a[i]){return FALSE;}
+    while(a[i])
+    {
+        if(a[i]>='a'&&a[i]<='z'){return FALSE;}
+        else if(a[i]>='A'&&a[i]<='Z'){return FALSE;}
+        else if(a[i]=='.'){return FALSE;}
+        else {i+=1;}
+    }
+    return TRUE;
+}
 BOOL StrContain(const CHAR*a, const CHAR*c)
 {
 	for(int i=0;a[i];i+=1)
@@ -124,6 +142,14 @@ BOOL IsCacheFile(LPSTR str)
 	if (StrContain(str,"mudclient")) return TRUE;
 	if (StrContain(str,".jag-")) return TRUE;
 	if (StrContain(str,".mem-")) return TRUE;
+	if (StrPrefixThenNoLettersOrDot(str,"title")) return TRUE;
+	if (StrPrefixThenNoLettersOrDot(str,"config")) return TRUE;
+	if (StrPrefixThenNoLettersOrDot(str,"interface")) return TRUE;
+	if (StrPrefixThenNoLettersOrDot(str,"media")) return TRUE;
+	if (StrPrefixThenNoLettersOrDot(str,"models")) return TRUE;
+	if (StrPrefixThenNoLettersOrDot(str,"textures")) return TRUE;
+	if (StrPrefixThenNoLettersOrDot(str,"wordenc")) return TRUE;
+	if (StrPrefixThenNoLettersOrDot(str,"sounds")) return TRUE;
 	return FALSE;
 }
 // directories to always archive
