@@ -150,7 +150,7 @@ BOOL IsCacheFile(LPSTR str)
 	if (StrPrefixThenNoLettersOrDot(str,"textures")) return TRUE;
 	if (StrPrefixThenNoLettersOrDot(str,"wordenc")) return TRUE;
 	if (StrPrefixThenNoLettersOrDot(str,"sounds")) return TRUE;
-	if (StrPrefixThenNoLettersOrDot(str,"crc")) return TRUE;
+	if (StrPrefixThenNoLettersOrDot(str,"crc")&&!StrEq(str,"crc32")) return TRUE;
 	if (StrPrefixThenNoLettersOrDot(str,"versionlist")) return TRUE;
 	if (StrPrefix(str,"runescape")&&!StrContain(str,".")) return TRUE;
 	return FALSE;
