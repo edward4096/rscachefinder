@@ -17,6 +17,7 @@ jobs:
     - name: Build the Program
       shell: cmd
       run: |
+        tree "C:\Program Files\Microsoft Visual Studio\" /f
         call "C:\Program Files\Microsoft Visual Studio\2026\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86
         rc cache_finder.rc
         cl cache_extract.cpp user32.lib comdlg32.lib
