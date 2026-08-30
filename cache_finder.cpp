@@ -142,6 +142,8 @@ BOOL IsCacheFile(LPSTR str)
 	if (StrContain(str,"mudclient")) return TRUE;
 	if (StrContain(str,".jag-")) return TRUE;
 	if (StrContain(str,".mem-")) return TRUE;
+	if (StrContain(str,"fileindex")&&StrSuffix(str,".txt")) return TRUE;
+	if (StrContain(str,".mid")&&StrSuffix(str,".gz")) return TRUE;
 	if (StrPrefixThenNoLettersOrDot(str,"title")) return TRUE;
 	if (StrPrefixThenNoLettersOrDot(str,"config")) return TRUE;
 	if (StrPrefixThenNoLettersOrDot(str,"interface")) return TRUE;
